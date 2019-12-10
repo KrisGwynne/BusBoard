@@ -1,0 +1,1 @@
+https://api.tfl.gov.uk/StopPoint?stopTypes=NaptanBusCoachStation&.lat=51.553935&lon=-0.144754
