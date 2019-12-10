@@ -1,6 +1,20 @@
 import rl from 'readline-sync';
 import req from 'request';
 
+class Bus {
+    constructor(line, dest, arrival){
+        this.line = line;
+        this.destination = dest;
+        this.arrival = arrival;
+    }
+    print() {
+        console.log('line: ', this.line);
+        console.log('destination: ', this.destination);
+        console.log('arrival time: ', this.arrival);
+        
+    }
+}
+
 //const POSTCODE = rl.question("Please enter a postcode: ")
 //const CODE = rl.question("Please enter a bus code: ");
 const CODE = '490010654S';
@@ -23,13 +37,6 @@ function getLoc(postcode, successCallback) {
     });
 }
 
-getLoc(POSTCODE, function (loc) {
-    getBusID(loc, function (ids) {
-        //console.log(ids);
-        getNextBuses(ids);
-    });
-});
-
 
 function getBusID(loc, successCallback) {
     const IDURL = "https://api.tfl.gov.uk/StopPoint?stopTypes=NaptanPublicBusCoachTram&lat=" + loc.lat + "&lon=" + loc.lon + "&app_key=2009c17b754eb17339154258424cfdca&app_id=ee46d9e0"
@@ -44,26 +51,47 @@ function getBusID(loc, successCallback) {
 
 
 
-function getNextBuses(ids) {
+function getNextBuses(ids, successCallback) {
 
-    for (let j = 0; j < 2; j++) {
-        const CODE = ids[j];
-        //console.log('Bus stop id:',CODE);
-        const BUSURL = 'https://api.tfl.gov.uk/StopPoint/' + CODE + '/Arrivals?app_id=ee46d9e0&app_key=2009c17b754eb17339154258424cfdca';
+    let count = 0;
+    let busstop = [];
+
+    ids.forEach(id => {
+
+        buses = [];
+
+        const BUSURL = 'https://api.tfl.gov.uk/StopPoint/' + id + '/Arrivals?app_id=ee46d9e0&app_key=2009c17b754eb17339154258424cfdca';
 
         req(BUSURL, function (error, response, body) {
 
-            let body_arr = JSON.parse(body)
+            let body_arr = JSON.parse(body);
             body_arr.sort(function (a, b) {
                 return new Date(a.expectedArrival) - new Date(b.expectedArrival);
             })
             let arr = body_arr.slice(0, 5);
             for (let i = 0; i < 5; i++) {
-                console.log('Bus stop id:',CODE);
-                console.log('lineName:', arr[i].lineName);
-                console.log('destinationName:', arr[i].destinationName);
-                console.log('expectedArrival:', arr[i].expectedArrival);
+
+                buses.push(new Bus(arr[i].lineName,arr[i].destinationName,arr[i].expectedArrival));
+                
+            }
+
+            busstop.push(buses);
+
+            if (++count === 2) {
+
+                successCallback(busstop);
             }
         });
-    }
+    });
 }
+
+
+getLoc(POSTCODE, function (loc) {
+    getBusID(loc, function (ids) {
+        //console.log(ids);
+        getNextBuses(ids, function (busstop){
+            console.log(busstop);
+            
+        });
+    });
+});
