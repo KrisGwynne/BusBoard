@@ -15,6 +15,12 @@ class Bus {
     }
 }
 
+class BusStop {
+    constructor(busArray) {
+        this.arrivals = busArray;
+    }
+}
+
 //const POSTCODE = rl.question("Please enter a postcode: ")
 //const CODE = rl.question("Please enter a bus code: ");
 const CODE = '490010654S';
@@ -58,7 +64,7 @@ function getNextBuses(ids, successCallback) {
 
     ids.forEach(id => {
 
-        buses = [];
+        let buses = [];
 
         const BUSURL = 'https://api.tfl.gov.uk/StopPoint/' + id + '/Arrivals?app_id=ee46d9e0&app_key=2009c17b754eb17339154258424cfdca';
 
