@@ -4,27 +4,28 @@ import Error from './error.js'
 export default class PostcodeAPI {
     constructor() {}
 
-    static getLoc(postcode, successCallback, errorCallback) {
+    static getLoc(postcode) {
         const POSTURL = 'http://api.postcodes.io/postcodes/' + postcode;
 
-        req(POSTURL, function (error, response, body) {
+        return new Promise((resolve, reject) => {
 
-            const body_parsed = JSON.parse(body)
+            req(POSTURL, function (error, response, body) {
 
-            if (body_parsed.status !== 200) {
-                errorCallback(new Error(body_parsed.status, body_parsed.error))
-            } else {
+                const body_parsed = JSON.parse(body)
 
-                const lon = body_parsed.result.longitude;
-                const lat = body_parsed.result.latitude;
+                if (body_parsed.status !== 200) {
+                    reject(new Error(body_parsed.status, body_parsed.error))
+                } else {
 
-                successCallback({
-                    lat: lat,
-                    lon: lon
-                });
-            }
+                    const lon = body_parsed.result.longitude;
+                    const lat = body_parsed.result.latitude;
 
-
+                    resolve({
+                        lat: lat,
+                        lon: lon
+                    });
+                }
+            });
         });
     }
 }
