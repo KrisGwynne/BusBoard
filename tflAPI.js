@@ -28,13 +28,11 @@ export default class TflAPI {
 
     static getNextBuses(ids) {
 
-        let count = 0;
-        let busStopList = [];
+        const promiseList = [];
 
-        return new Promise((resolve, reject) => {
+        ids.forEach(id => {
 
-            ids.forEach(id => {
-
+            promiseList.push(new Promise((resolve, reject) => {
                 const BUSURL = 'https://api.tfl.gov.uk/StopPoint/' + id + '/Arrivals?app_id=ee46d9e0&app_key=2009c17b754eb17339154258424cfdca';
 
                 req(BUSURL, function (error, response, body) {
@@ -44,14 +42,12 @@ export default class TflAPI {
                     if (response.statusCode !== 200) {
                         reject(new Error(response.statusCode, response.statusMessage));
                     } else {
-                        let busStop = BusStop.makeStop(id, body_arr);
-                        busStopList.push(busStop);
-                        if (++count === ids.length) {
-                            resolve(busStopList);
-                        }
+                        resolve(BusStop.makeStop(id, body_arr));
                     }
                 });
-            });
+            }))
         });
+
+        return Promise.all(promiseList);
     }
 }

@@ -17,3 +17,11 @@ POSTCODES.forEach(POSTCODE => {
         .then(bsList => bsList.forEach(x => x.print()))
         .catch(err => err.print());
 });
+
+
+/*PostcodeAPI.getLoc(POSTCODE)
+    .then(loc => TflAPI.getBusID(loc))
+    .then(ids => TflAPI.getNextBuses(ids))
+    .then(bsList => bsList.forEach(x => x.print()))
+    .catch(err => err.print());
+*/
