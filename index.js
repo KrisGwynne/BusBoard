@@ -2,7 +2,7 @@ import rl from 'readline-sync';
 import req from 'request';
 
 class Bus {
-    constructor(line, dest, arrival){
+    constructor(line, dest, arrival) {
         this.line = line;
         this.destination = dest;
         this.arrival = arrival;
@@ -11,13 +11,28 @@ class Bus {
         console.log('line: ', this.line);
         console.log('destination: ', this.destination);
         console.log('arrival time: ', this.arrival);
-        
     }
 }
 
 class BusStop {
-    constructor(busArray) {
+    constructor(id, busArray) {
+        this.id = id;
         this.arrivals = busArray;
+    }
+
+    print() {
+        console.log('id: ', this.id);
+        console.log('arrivals: ', this.arrivals);
+    }
+
+    static makeStop(id, parsedBuses, numBuses) {
+
+        parsedBuses.sort(function (a, b) {
+            return new Date(a.expectedArrival) - new Date(b.expectedArrival);
+        })
+
+        parsedBuses = parsedBuses.slice(0, numBuses).map(x => new Bus(x.lineName, x.destinationName, x.expectedArrival));
+        return new BusStop(id, parsedBuses);
     }
 }
 
@@ -55,37 +70,23 @@ function getBusID(loc, successCallback) {
     });
 }
 
-
-
 function getNextBuses(ids, successCallback) {
 
     let count = 0;
-    let busstop = [];
+    let busStopList = [];
 
     ids.forEach(id => {
-
-        let buses = [];
 
         const BUSURL = 'https://api.tfl.gov.uk/StopPoint/' + id + '/Arrivals?app_id=ee46d9e0&app_key=2009c17b754eb17339154258424cfdca';
 
         req(BUSURL, function (error, response, body) {
 
-            let body_arr = JSON.parse(body);
-            body_arr.sort(function (a, b) {
-                return new Date(a.expectedArrival) - new Date(b.expectedArrival);
-            })
-            let arr = body_arr.slice(0, 5);
-            for (let i = 0; i < 5; i++) {
+            const body_arr = JSON.parse(body);
+            let busStop = BusStop.makeStop(id, body_arr);
+            busStopList.push(busStop);
 
-                buses.push(new Bus(arr[i].lineName,arr[i].destinationName,arr[i].expectedArrival));
-                
-            }
-
-            busstop.push(buses);
-
-            if (++count === 2) {
-
-                successCallback(busstop);
+            if (++count === ids.length) {
+                successCallback(busStopList);
             }
         });
     });
@@ -94,10 +95,8 @@ function getNextBuses(ids, successCallback) {
 
 getLoc(POSTCODE, function (loc) {
     getBusID(loc, function (ids) {
-        //console.log(ids);
-        getNextBuses(ids, function (busstop){
-            console.log(busstop);
-            
+        getNextBuses(ids, function (busStopList) {
+            busStopList.forEach(x => x.print());
         });
     });
 });
