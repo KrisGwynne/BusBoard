@@ -1,27 +1,24 @@
 import rl from 'readline-sync';
 import PostcodeAPI from './postcodeAPI.js';
 import TflAPI from './tflAPI.js';
+import express from 'express';
 
-//const POSTCODE = rl.question("Please enter a postcode: ")
-//const CODE = rl.question("Please enter a bus code: ");
 //const CODE = '490010654S';
+//const POSTCODES = ['N44EB', 'spioj', 'OX14JD'];
 
-const POSTCODES = ['N44EB', 'spioj', 'OX14JD'];
-//const POSTCODE = 'N44EB'
+const app = express();
+const port = 2002;
 
-POSTCODES.forEach(POSTCODE => {
+app.get('/postcode/:postcode', function (req, res) {
+
+    const POSTCODE = req.params.postcode;
 
     PostcodeAPI.getLoc(POSTCODE)
         .then(loc => TflAPI.getBusID(loc))
         .then(ids => TflAPI.getNextBuses(ids))
-        .then(bsList => bsList.forEach(x => x.print()))
-        .catch(err => err.print());
-});
+        .then(bsList => res.json(bsList))
+        .catch(err => res.json(err));
 
+})
 
-/*PostcodeAPI.getLoc(POSTCODE)
-    .then(loc => TflAPI.getBusID(loc))
-    .then(ids => TflAPI.getNextBuses(ids))
-    .then(bsList => bsList.forEach(x => x.print()))
-    .catch(err => err.print());
-*/
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
