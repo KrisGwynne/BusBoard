@@ -7,7 +7,9 @@ import express from 'express';
 //const POSTCODES = ['N44EB', 'spioj', 'OX14JD'];
 
 const app = express();
-const port = 2002;
+const port = 3300;
+
+app.use(express.static('frontend'));
 
 app.get('/postcode/:postcode', function (req, res) {
 
