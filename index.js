@@ -16,8 +16,8 @@ app.get('/postcode/:postcode', function (req, res) {
     const POSTCODE = req.params.postcode;
 
     PostcodeAPI.getLoc(POSTCODE)
-        .then(loc => TflAPI.getBusID(loc))
-        .then(ids => TflAPI.getNextBuses(ids))
+        .then(loc => TflAPI.getBusStopID(loc))
+        .then(stops => TflAPI.getNextBuses(stops))
         .then(bsList => res.json(bsList))
         .catch(err => res.json(err));
 
